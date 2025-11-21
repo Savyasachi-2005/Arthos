@@ -7,6 +7,7 @@ pydantic-settings==2.1.0
 # Database dependencies
 sqlmodel==0.0.14
 sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
 
 # Testing dependencies
 pytest==7.4.3
@@ -16,3 +17,19 @@ httpx==0.25.2
 # Utilities
 python-multipart==0.0.6
 python-dateutil==2.8.2
+
+psycopg2-binary
+python-dotenv==1.0.1
+
+# OCR and PDF processing
+pytesseract==0.3.10
+easyocr==1.7.0
+Pillow==10.1.0
+pdfplumber==0.10.3
+PyPDF2==3.0.1
+
+# AI/ML
+google-generativeai==0.3.2
+
+# Report generation
+reportlab==4.0.7

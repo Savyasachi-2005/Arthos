@@ -76,6 +76,14 @@ export const Home: React.FC = () => {
               <Button
                 size="lg"
                 variant="outline"
+                onClick={() => navigate('/bank-analyzer')}
+                className="bg-transparent border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm"
+              >
+                🏦 Bank Statement Analyzer
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
                 onClick={() => navigate('/subscriptions')}
                 className="bg-transparent border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm"
               >
@@ -452,17 +460,6 @@ export const Home: React.FC = () => {
           </div>
         </Card>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <p className="text-gray-600 text-sm">
-              © 2025 Arthos. Built with ❤️ for better financial management.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

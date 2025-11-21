@@ -55,7 +55,9 @@ async def analyze_upi_messages(
                 summary=SummaryData(
                     total_spend=0.0,
                     transaction_count=0,
-                    top_category=None
+                    top_category=None,
+                    categories={},
+                    top_merchants=[]
                 ),
                 categories={},
                 transactions=[]
@@ -93,13 +95,20 @@ async def analyze_upi_messages(
         # Build summary
         summary_data = build_summary(db_transactions)
         
+        # Get top merchants
+        top_merchants_list = get_top_merchants(db_transactions)
+        
         # Convert to response format
         transaction_outs = [
             TransactionOut.model_validate(t) for t in db_transactions
         ]
         
         return AnalyzeResponse(
-            summary=SummaryData(**summary_data["summary"]),
+            summary=SummaryData(
+                **summary_data["summary"],
+                categories=summary_data["categories"],
+                top_merchants=top_merchants_list
+            ),
             categories=summary_data["categories"],
             transactions=transaction_outs
         )

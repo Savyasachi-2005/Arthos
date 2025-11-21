@@ -154,3 +154,61 @@ export interface SubscriptionQueryParams {
   limit?: number;
   offset?: number;
 }
+
+// Bank Statement Analysis Types
+
+export interface BankTransaction {
+  date: string | null;
+  merchant: string;
+  amount: number;
+  category: string;
+  type: 'debit' | 'credit';
+}
+
+export interface MonthlySummary {
+  month: string;
+  total: number;
+}
+
+export interface AnalysisSummary {
+  total_spend: number;
+  total_income: number;
+  top_category: string;
+  top_merchant: string;
+  wasteful_spending: string[];
+  monthly_summary: Record<string, number>;
+  category_breakdown: Record<string, number>;
+}
+
+export interface StatementUploadResponse {
+  raw_text: string;
+  lines: string[];
+  line_count: number;
+}
+
+export interface AnalyzeStatementRequest {
+  raw_text: string;
+}
+
+export interface AnalyzeStatementResponse {
+  summary: AnalysisSummary;
+  transactions: BankTransaction[];
+  anomalies: string[];
+  recommendations: string[];
+  subscriptions_detected: string[];
+  duplicate_charges: string[];
+}
+
+export interface BankAnalysisHistoryItem {
+  id: string;
+  timestamp: string;
+  raw_text_preview: string;
+  total_spend: number;
+  transaction_count: number;
+  top_category: string;
+}
+
+export interface BankAnalysisHistoryResponse {
+  analyses: BankAnalysisHistoryItem[];
+  total: number;
+}
