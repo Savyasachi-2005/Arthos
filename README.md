@@ -78,7 +78,7 @@ API Documentation: `http://localhost:8000/docs`
 
 1. Navigate to the frontend directory:
 ```powershell
-cd g:\hackathon\Arthos\fd
+cd a:\Arthos\fd
 ```
 
 2. Install dependencies:

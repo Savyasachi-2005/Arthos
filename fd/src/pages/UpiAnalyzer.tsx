@@ -2,15 +2,18 @@
  * UPI Analyzer Page - Main analysis interface
  */
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { UpiInput } from '../components/upi/UpiInput';
 import { SpendSummaryCard } from '../components/upi/SpendSummaryCard';
 import { CategoryBreakdownChart } from '../components/upi/CategoryBreakdownChart';
 import { MerchantListTable } from '../components/upi/MerchantListTable';
+import { Button } from '../components/ui/Button';
 import { useAnalyzeUpi } from '../hooks/useAnalyzeUpi';
-import { AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Home, LayoutDashboard } from 'lucide-react';
 
 export const UpiAnalyzer: React.FC = () => {
-  const { mutate: analyzeUpi, data, isLoading, isError, error } = useAnalyzeUpi();
+  const navigate = useNavigate();
+  const { mutate: analyzeUpi, data, isPending, isError, error } = useAnalyzeUpi();
 
   const handleAnalyze = (text: string) => {
     analyzeUpi(text);
@@ -21,12 +24,32 @@ export const UpiAnalyzer: React.FC = () => {
       {/* Header */}
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-text-primary">
-            Arthos - UPI Spend Analyzer
-          </h1>
-          <p className="mt-2 text-sm text-text-secondary">
-            Analyze your UPI transactions and gain insights into your spending patterns
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-text-primary">
+                Arthos - UPI Spend Analyzer
+              </h1>
+              <p className="mt-2 text-sm text-text-secondary">
+                Analyze your UPI transactions and gain insights into your spending patterns
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => navigate('/')}
+                variant="outline"
+              >
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button
+                onClick={() => navigate('/dashboard')}
+                variant="outline"
+              >
+                <LayoutDashboard className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -35,7 +58,7 @@ export const UpiAnalyzer: React.FC = () => {
         <div className="space-y-6">
           {/* Input Section */}
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <UpiInput onAnalyze={handleAnalyze} loading={isLoading} />
+            <UpiInput onAnalyze={handleAnalyze} loading={isPending} />
           </div>
 
           {/* Error Message */}
@@ -119,7 +142,7 @@ export const UpiAnalyzer: React.FC = () => {
           )}
 
           {/* Empty State */}
-          {!data && !isLoading && !isError && (
+          {!data && !isPending && !isError && (
             <div className="bg-white rounded-lg shadow-sm p-12 text-center">
               <div className="max-w-md mx-auto">
                 <div className="text-6xl mb-4">📊</div>
