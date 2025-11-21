@@ -63,7 +63,7 @@ export const Home: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/analyzer')}
-                className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                className="!bg-white !text-blue-700 hover:!bg-blue-50 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
               >
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Analyze UPI Messages
@@ -314,7 +314,7 @@ export const Home: React.FC = () => {
                 <Button
                   size="lg"
                   onClick={() => navigate('/analyzer')}
-                  className="bg-white text-blue-600 hover:bg-blue-50 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
+                  className="!bg-white !text-blue-700 hover:!bg-blue-50 shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
                 >
                   <CreditCard className="h-5 w-5 mr-2" />
                   Analyze Your Spending
