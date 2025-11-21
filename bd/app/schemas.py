@@ -1,11 +1,13 @@
 """
 Pydantic schemas for API request/response validation.
 """
-from datetime import datetime
+from datetime import date, datetime
 from typing import Dict, List, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat
+
+from app.models import BillingCycle
 
 
 class UPIAnalyzeRequest(BaseModel):
@@ -61,3 +63,49 @@ class TransactionListResponse(BaseModel):
 class HealthResponse(BaseModel):
     """Health check response."""
     status: str
+
+class SubscriptionBase(BaseModel):
+    """Shared subscription fields."""
+    name: str = Field(..., min_length=1, max_length=120)
+    amount: PositiveFloat = Field(..., description="Subscription charge amount in INR")
+    billing_cycle: BillingCycle
+    renewal_date: date
+
+class SubscriptionCreate(SubscriptionBase):
+    """Payload for creating a subscription."""
+    pass
+
+class SubscriptionUpdate(BaseModel):
+    """Payload for updating a subscription."""
+    name: Optional[str] = Field(None, min_length=1, max_length=120)
+    amount: Optional[PositiveFloat] = Field(None, description="Subscription charge amount in INR")
+    billing_cycle: Optional[BillingCycle] = None
+    renewal_date: Optional[date] = None
+
+class SubscriptionResponse(SubscriptionBase):
+    """Subscription with metadata."""
+    id: int
+    created_at: datetime
+    monthly_equivalent: float = Field(0.0, description="Monthly normalized spend for this subscription")
+
+    class Config:
+        from_attributes = True
+
+class UpcomingRenewal(BaseModel):
+    """Upcoming renewal details."""
+    name: str
+    days_left: int
+    renewal_date: date
+
+class SubscriptionSummaryResponse(BaseModel):
+    """Aggregate burn-rate summary."""
+    monthly_burn: float
+    yearly_burn: float
+    upcoming_renewals: List[UpcomingRenewal] = Field(default_factory=list)
+
+class SubscriptionListResponse(BaseModel):
+    """Paginated subscriptions response."""
+    items: List[SubscriptionResponse]
+    total: int
+    limit: int
+    offset: int

@@ -111,3 +111,46 @@ export const CATEGORIES: Record<string, CategoryConfig> = {
 };
 
 export type CategoryName = keyof typeof CATEGORIES;
+
+export type BillingCycle = 'monthly' | 'yearly';
+
+export interface SubscriptionPayload {
+  name: string;
+  amount: number;
+  billing_cycle: BillingCycle;
+  renewal_date: string; // ISO date string
+}
+
+export interface Subscription extends SubscriptionPayload {
+  id: number;
+  created_at: string;
+  monthly_equivalent: number;
+}
+
+export interface SubscriptionListResponse {
+  items: Subscription[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface UpcomingRenewalSummary {
+  name: string;
+  days_left: number;
+  renewal_date: string;
+}
+
+export interface SubscriptionSummary {
+  monthly_burn: number;
+  yearly_burn: number;
+  upcoming_renewals: UpcomingRenewalSummary[];
+}
+
+export interface SubscriptionQueryParams {
+  name?: string;
+  min_amount?: number;
+  max_amount?: number;
+  billing_cycle?: BillingCycle;
+  limit?: number;
+  offset?: number;
+}

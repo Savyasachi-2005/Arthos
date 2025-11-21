@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Home } from './pages/Home';
 import { UpiAnalyzer } from './pages/UpiAnalyzer';
 import { Dashboard } from './pages/Dashboard';
+import { Subscriptions } from './pages/Subscriptions';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -26,7 +27,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/analyzer" element={<UpiAnalyzer />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/subscriptions" element={<Navigate to="/" replace />} />
+          <Route path="/subscriptions" element={<Subscriptions />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

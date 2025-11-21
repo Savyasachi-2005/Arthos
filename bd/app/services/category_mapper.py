@@ -70,26 +70,19 @@ def map_category(raw_text: str, merchant: Optional[str]) -> str:
     Returns:
         Category name (defaults to "Others" if no match)
     """
-    # Combine text sources for matching
-    text_to_check = raw_text.lower()
+    # Prepare sources so merchant keywords get priority over generic text matches
+    text_sources = []
     if merchant and merchant != "Unknown":
-        text_to_check += " " + merchant.lower()
-    
-    # Check each category's keywords
-    matched_categories = []
-    
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword.lower() in text_to_check:
-                matched_categories.append(category)
-                break  # Move to next category after first match
-    
-    # Return first matched category or "Others"
-    if matched_categories:
-        category = matched_categories[0]
-        logger.debug(f"Mapped to category '{category}' based on keywords")
-        return category
-    
+        text_sources.append(merchant.lower())
+    text_sources.append(raw_text.lower())
+
+    for source in text_sources:
+        for category, keywords in CATEGORY_KEYWORDS.items():
+            for keyword in keywords:
+                if keyword.lower() in source:
+                    logger.debug("Mapped to category '%s' via keyword '%s'", category, keyword)
+                    return category
+
     logger.debug("No category match found, defaulting to 'Others'")
     return "Others"
 

@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db
-from app.routers import upi
+from app.routers import upi, subscriptions
 from app.schemas import HealthResponse
 
 # Configure logging
@@ -55,6 +55,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(upi.router)
+app.include_router(subscriptions.router)
 
 
 @app.get("/", tags=["Root"])

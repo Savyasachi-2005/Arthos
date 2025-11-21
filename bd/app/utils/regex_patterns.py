@@ -50,6 +50,8 @@ DATE_PATTERNS = [
 
 # Merchant extraction patterns - looks for merchant names in common phrases
 # Order matters - more specific patterns first
+STOP_WORDS = {"your", "account", "acct", "a/c", "upi"}
+
 MERCHANT_PATTERNS = [
     # UPI Mandate: "towards STORYTV from"
     r'(?i)towards\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+from|\s+A/c)',
@@ -58,7 +60,7 @@ MERCHANT_PATTERNS = [
     # Standard: "paid to <merchant>"
     r'(?i)(?:paid?\s+)?to\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+on|\s+was|\s+for|\.|\s+UPI|\s+Ref|\s+from)',
     # "at <merchant>"
-    r'(?i)at\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+on|\s+was|\.|\s+Dial)',
+    r'(?i)at\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+on|\s+was|\s+for|\.|\s+Dial)',
     # "payment to <merchant>"
     r'(?i)payment\s+to\s+([A-Z][A-Za-z0-9\s&]+?)(?:\s+on|\s+was|\.|\s+Ref|\s+from)',
     # "for UPI payment to <merchant>"
@@ -110,7 +112,7 @@ def extract_merchant(text: str) -> Optional[str]:
             # Clean up merchant name (remove extra spaces, trailing punctuation)
             merchant = re.sub(r'\s+', ' ', merchant)
             merchant = merchant.rstrip('.,;:')
-            if len(merchant) > 2:  # Ensure it's not just initials
+            if len(merchant) > 2 and merchant.lower() not in STOP_WORDS:
                 return merchant
     return None
 
