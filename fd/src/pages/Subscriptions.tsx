@@ -19,7 +19,10 @@ import { useSubscriptionSummary } from '../hooks/useSubscriptionSummary';
 import { formatCurrency } from '../utils/format';
 
 export const Subscriptions: React.FC = () => {
-  const [filters, setFilters] = useState<SubscriptionQueryParams>({ limit: 100, offset: 0 });
+  const [filters, setFilters] = useState<SubscriptionQueryParams>({
+    limit: 100,
+    offset: 0,
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubscription, setEditingSubscription] = useState<Subscription | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,8 +40,8 @@ export const Subscriptions: React.FC = () => {
 
   const chartData = useMemo(
     () => [
-      { name: 'Monthly Burn', value: summary?.monthly_burn ?? 0 },
-      { name: 'Yearly Burn', value: summary?.yearly_burn ?? 0 },
+      { name: "Monthly Burn", value: summary?.monthly_burn ?? 0 },
+      { name: "Yearly Burn", value: summary?.yearly_burn ?? 0 },
     ],
     [summary]
   );
@@ -105,9 +108,17 @@ export const Subscriptions: React.FC = () => {
 
   const activeSubscriptions = subscriptionList?.items || [];
   const upcomingCount = summary?.upcoming_renewals.length || 0;
-  const monthlyValue = summaryLoading ? 'Loading…' : summary ? formatCurrency(summary.monthly_burn) : '—';
-  const yearlyValue = summaryLoading ? 'Loading…' : summary ? formatCurrency(summary.yearly_burn) : '—';
-  const upcomingValue = summaryLoading ? '…' : `${upcomingCount}`;
+  const monthlyValue = summaryLoading
+    ? "Loading…"
+    : summary
+    ? formatCurrency(summary.monthly_burn)
+    : "—";
+  const yearlyValue = summaryLoading
+    ? "Loading…"
+    : summary
+    ? formatCurrency(summary.yearly_burn)
+    : "—";
+  const upcomingValue = summaryLoading ? "…" : `${upcomingCount}`;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-10 px-4 sm:px-6 lg:px-10">
@@ -327,7 +338,9 @@ export const Subscriptions: React.FC = () => {
               initialValues={editingSubscription || undefined}
               onSubmit={handleSubmit}
               onCancel={handleCloseModal}
-              isSubmitting={createMutation.isPending || updateMutation.isPending}
+              isSubmitting={
+                createMutation.isPending || updateMutation.isPending
+              }
             />
           </div>
         </div>
