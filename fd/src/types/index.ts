@@ -1,0 +1,113 @@
+/**
+ * Core TypeScript types and interfaces for the Arthos UPI Analyzer
+ */
+
+export interface Transaction {
+  id: string;
+  merchant: string | null;
+  amount: number;
+  category: string;
+  timestamp: string | null;
+  raw_text: string;
+  created_at?: string;
+}
+
+export interface TopMerchant {
+  merchant: string;
+  total_spent: number;
+  count: number;
+}
+
+export interface Summary {
+  total_spend: number;
+  transaction_count: number;
+  top_category: string | null;
+  categories: Categories;
+  top_merchants: TopMerchant[];
+}
+
+export interface Categories {
+  [key: string]: number;
+}
+
+export interface AnalyzeResponse {
+  summary: Summary;
+  categories: Categories;
+  transactions: Transaction[];
+}
+
+export interface TransactionListResponse {
+  transactions: Transaction[];
+  total: number;
+  limit: number;
+  offset: number;
+  summary: Summary;
+}
+
+export interface UpiAnalyzeRequest {
+  raw_text: string;
+}
+
+export interface TransactionQueryParams {
+  limit?: number;
+  offset?: number;
+  category?: string;
+  min_amount?: number;
+  max_amount?: number;
+}
+
+export interface CategoryConfig {
+  name: string;
+  color: string;
+  icon: string;
+}
+
+export const CATEGORIES: Record<string, CategoryConfig> = {
+  Food: {
+    name: 'Food',
+    color: '#FF6B6B',
+    icon: '🍔',
+  },
+  Travel: {
+    name: 'Travel',
+    color: '#4ECDC4',
+    icon: '🚗',
+  },
+  Bills: {
+    name: 'Bills',
+    color: '#95E1D3',
+    icon: '💡',
+  },
+  Shopping: {
+    name: 'Shopping',
+    color: '#F38181',
+    icon: '🛍️',
+  },
+  Groceries: {
+    name: 'Groceries',
+    color: '#A8E6CF',
+    icon: '🛒',
+  },
+  Entertainment: {
+    name: 'Entertainment',
+    color: '#FFD3B6',
+    icon: '🎬',
+  },
+  Education: {
+    name: 'Education',
+    color: '#FFAAA5',
+    icon: '📚',
+  },
+  Health: {
+    name: 'Health',
+    color: '#FF8B94',
+    icon: '⚕️',
+  },
+  Others: {
+    name: 'Others',
+    color: '#B8B8D1',
+    icon: '📦',
+  },
+};
+
+export type CategoryName = keyof typeof CATEGORIES;
