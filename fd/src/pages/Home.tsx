@@ -5,6 +5,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTransactions } from '../hooks/useTransactions';
+import { useSubscriptions } from '../hooks/useSubscriptions';
+import { useSubscriptionSummary } from '../hooks/useSubscriptionSummary';
 import { Card, CardHeader } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { 
@@ -16,24 +18,21 @@ import {
   Zap,
   BarChart3,
   Calendar,
-  PieChart
+  PieChart,
+  Bell,
+  Sparkles
 } from 'lucide-react';
-import { formatCurrency } from '../utils/format';
-
-// Dummy subscription data (will be replaced with real API later)
-const dummySubscriptions = [
-  { name: 'Netflix', amount: 199, icon: '🎬', color: '#E50914' },
-  { name: 'Spotify', amount: 129, icon: '🎵', color: '#1DB954' },
-  { name: 'YouTube Premium', amount: 139, icon: '▶️', color: '#FF0000' },
-  { name: 'Amazon Prime', amount: 299, icon: '📦', color: '#FF9900' },
-];
+import { formatCurrency, formatDate } from '../utils/format';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useTransactions({ limit: 10 });
+  const { data: subscriptionsData, isLoading: subsLoading } = useSubscriptions({ limit: 4 });
+  const { data: summary } = useSubscriptionSummary();
 
-  // Calculate subscription burn rate
-  const monthlyBurnRate = dummySubscriptions.reduce((sum, sub) => sum + sub.amount, 0);
+  // Calculate subscription burn rate from real API
+  const monthlyBurnRate = summary?.monthly_burn || 0;
+  const upcomingRenewals = summary?.upcoming_renewals?.length || 0;
 
   // Calculate category distribution for mini preview
   const topCategories = data?.summary?.categories 
@@ -49,8 +48,8 @@ export const Home: React.FC = () => {
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
           <div className="text-center">
-            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Zap className="h-4 w-4 text-yellow-300" />
+            <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 animate-pulse">
+              <Sparkles className="h-4 w-4 text-yellow-300" />
               <span className="text-sm font-medium">Your Financial Command Center</span>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
@@ -59,6 +58,12 @@ export const Home: React.FC = () => {
             <p className="text-xl sm:text-2xl text-blue-100 max-w-3xl mx-auto mb-10">
               Analyze your spending, track subscriptions, and take control of your financial future — all in one place.
             </p>
+            {upcomingRenewals > 0 && (
+              <div className="mb-6 inline-flex items-center space-x-2 bg-yellow-400/20 backdrop-blur-sm rounded-full px-4 py-2 border border-yellow-300/30">
+                <Bell className="h-4 w-4 text-yellow-200 animate-bounce" />
+                <span className="text-sm font-medium">{upcomingRenewals} subscription{upcomingRenewals > 1 ? 's' : ''} renewing soon</span>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button
                 size="lg"
@@ -67,6 +72,15 @@ export const Home: React.FC = () => {
               >
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Analyze UPI Messages
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/subscriptions')}
+                className="bg-transparent border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm"
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                Manage Subscriptions
               </Button>
               <Button
                 size="lg"
@@ -232,10 +246,20 @@ export const Home: React.FC = () => {
           <Card className="shadow-xl shadow-gray-200/50 border-0 hover:shadow-2xl transition-shadow duration-300">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <CardHeader 
-                  title="Active Subscriptions" 
-                  subtitle={`${formatCurrency(monthlyBurnRate)}/month burn rate`}
-                />
+                <div>
+                  <CardHeader 
+                    title="Active Subscriptions" 
+                    subtitle={subsLoading ? 'Loading...' : `${formatCurrency(monthlyBurnRate)}/month burn rate`}
+                  />
+                  {upcomingRenewals > 0 && (
+                    <div className="mt-2 inline-flex items-center space-x-2 bg-yellow-50 rounded-full px-3 py-1 border border-yellow-200">
+                      <Bell className="h-3 w-3 text-yellow-600" />
+                      <span className="text-xs font-medium text-yellow-700">
+                        {upcomingRenewals} renewal{upcomingRenewals > 1 ? 's' : ''} coming soon
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <Button
                   size="sm"
                   variant="outline"
@@ -247,48 +271,134 @@ export const Home: React.FC = () => {
                 </Button>
               </div>
 
-              <div className="space-y-4">
-                {dummySubscriptions.map((sub, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200"
+              {subsLoading ? (
+                <div className="flex items-center justify-center h-48">
+                  <Activity className="h-8 w-8 text-purple-500 animate-pulse" />
+                </div>
+              ) : !subscriptionsData?.items || subscriptionsData.items.length === 0 ? (
+                <div className="text-center py-12 text-gray-400">
+                  <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm mb-2">No subscriptions tracked yet</p>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/subscriptions')}
+                    className="mt-4"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div 
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm"
-                        style={{ backgroundColor: `${sub.color}15` }}
-                      >
-                        {sub.icon}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-gray-800">{sub.name}</p>
-                        <p className="text-xs text-gray-500">Monthly subscription</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-gray-800">
-                        {formatCurrency(sub.amount)}
-                      </p>
-                      <p className="text-xs text-gray-500">/month</p>
-                    </div>
-                  </div>
-                ))}
+                    <Zap className="h-4 w-4 mr-2" />
+                    Add Your First Subscription
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {subscriptionsData.items.map((sub) => {
+                    // Generate color based on subscription name
+                    const colors: Record<string, string> = {
+                      'netflix': '#E50914',
+                      'spotify': '#1DB954',
+                      'youtube': '#FF0000',
+                      'amazon': '#FF9900',
+                      'prime': '#00A8E1',
+                      'disney': '#113CCF',
+                      'apple': '#000000',
+                      'notion': '#000000',
+                      'figma': '#F24E1E',
+                      'adobe': '#FF0000',
+                    };
+                    const matchedColor = Object.entries(colors).find(([key]) => 
+                      sub.name.toLowerCase().includes(key)
+                    )?.[1];
+                    const subColor = matchedColor || '#6366F1';
+                    
+                    // Generate icon based on subscription name
+                    const icons: Record<string, string> = {
+                      'netflix': '🎬',
+                      'spotify': '🎵',
+                      'youtube': '▶️',
+                      'amazon': '📦',
+                      'prime': '📦',
+                      'disney': '🏰',
+                      'apple': '🍎',
+                      'notion': '📝',
+                      'figma': '🎨',
+                      'adobe': '📸',
+                    };
+                    const matchedIcon = Object.entries(icons).find(([key]) => 
+                      sub.name.toLowerCase().includes(key)
+                    )?.[1];
+                    const subIcon = matchedIcon || '📱';
 
-                {/* Total Burn Rate */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <Zap className="h-5 w-5 text-purple-600" />
+                    return (
+                      <div
+                        key={sub.id}
+                        className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                        onClick={() => navigate('/subscriptions')}
+                      >
+                        <div className="flex items-center space-x-4">
+                          <div 
+                            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm group-hover:scale-110 transition-transform duration-200"
+                            style={{ backgroundColor: `${subColor}15` }}
+                          >
+                            {subIcon}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">{sub.name}</p>
+                            <p className="text-xs text-gray-500 capitalize">
+                              {sub.billing_cycle} • Renews {formatDate(sub.renewal_date)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-gray-800">
+                            {formatCurrency(sub.monthly_equivalent)}
+                          </p>
+                          <p className="text-xs text-gray-500">/month</p>
+                        </div>
                       </div>
-                      <span className="font-semibold text-gray-800">Total Monthly Burn</span>
+                    );
+                  })}
+
+                  {/* Show upcoming renewals */}
+                  {summary?.upcoming_renewals && summary.upcoming_renewals.length > 0 && (
+                    <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                      <div className="flex items-start space-x-3">
+                        <Bell className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-yellow-800 mb-2">
+                            Upcoming Renewals
+                          </p>
+                          <div className="space-y-1">
+                            {summary.upcoming_renewals.slice(0, 2).map((renewal, idx) => (
+                              <p key={idx} className="text-xs text-yellow-700">
+                                • <span className="font-medium">{renewal.name}</span> in {renewal.days_left} day{renewal.days_left !== 1 ? 's' : ''}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <span className="text-2xl font-bold text-purple-600">
-                      {formatCurrency(monthlyBurnRate)}
-                    </span>
+                  )}
+
+                  {/* Total Burn Rate */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <Zap className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-800 block">Total Monthly Burn</span>
+                          <span className="text-xs text-gray-500">
+                            {formatCurrency(summary?.yearly_burn || 0)}/year
+                          </span>
+                        </div>
+                      </div>
+                      <span className="text-2xl font-bold text-purple-600">
+                        {formatCurrency(monthlyBurnRate)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </Card>
         </div>
@@ -318,6 +428,15 @@ export const Home: React.FC = () => {
                 >
                   <CreditCard className="h-5 w-5 mr-2" />
                   Analyze Your Spending
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => navigate('/subscriptions')}
+                  className="bg-transparent border-2 border-white text-white hover:bg-white/10 backdrop-blur-sm"
+                >
+                  <Calendar className="h-5 w-5 mr-2" />
+                  Track Subscriptions
                 </Button>
                 <Button
                   size="lg"
