@@ -1,4 +1,5 @@
 {
-  "buildCommand": "npm run vercel-build",
-  "outputDirectory": "fd/dist"
+  "buildCommand": "cd fd && npm run vercel-build",
+  "outputDirectory": "fd/dist",
+  "installCommand": "cd fd && npm install"
 }
