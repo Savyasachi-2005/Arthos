@@ -50,10 +50,10 @@ The backend is already configured for Render deployment with:
    
    ```bash
    # Database URL (INTERNAL URL - faster, no external network charges)
-   database_url=postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a/arthos
+   database_url=url
    
    # Gemini API Key for AI features
-   GEMINI_API_KEY=AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
+   GEMINI_API_KEY=api
    
    # Python environment
    PYTHON_VERSION=3.12.0
@@ -341,3 +341,4 @@ Once deployed, your application will be live at:
 - **API Docs**: `https://your-backend.onrender.com/docs`
 
 Share your live application and enjoy! 🚀
+
