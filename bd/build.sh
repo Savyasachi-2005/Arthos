@@ -1,9 +1,11 @@
 #!/bin/bash
 # Build script for Render deployment
 
-# Set CARGO_HOME to a writable directory for Rust dependencies
-export CARGO_HOME=$HOME/.cargo
+# Set environment variables for Rust toolchain
+export CARGO_HOME=/opt/render/project/.cargo
+export RUSTUP_HOME=/opt/render/project/.rustup
 mkdir -p $CARGO_HOME
+mkdir -p $RUSTUP_HOME
 
 # Upgrade pip to latest version
 pip install --upgrade pip
