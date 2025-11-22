@@ -1,5 +1,18 @@
 {
-  "buildCommand": "npm --prefix fd install && npm --prefix fd run build",
-  "outputDirectory": "fd/dist",
-  "installCommand": "echo 'Skipping root install'"
+  "version": 2,
+  "builds": [
+    {
+      "src": "fd/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/fd/$1"
+    }
+  ]
 }
