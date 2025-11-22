@@ -5,9 +5,9 @@
 Add these in Render Dashboard → Your Web Service → Environment:
 
 ```bash
-database_url=postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a/arthos
+database_url=postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST/YOUR_DB_NAME
 
-GEMINI_API_KEY=AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
+GEMINI_API_KEY=your_gemini_api_key_here
 
 PYTHON_VERSION=3.12.0
 ```
