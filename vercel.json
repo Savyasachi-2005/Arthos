@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd fd && npm run build",
-  "outputDirectory": "fd/dist",
-  "installCommand": "cd fd && npm install"
+  "installCommand": "if [ -d fd ]; then (cd fd && npm install); else npm install; fi",
+  "buildCommand": "if [ -d fd ]; then (cd fd && npm run build && rm -rf ../dist && cp -r dist ../dist); else npm run build; fi",
+  "outputDirectory": "dist"
 }
