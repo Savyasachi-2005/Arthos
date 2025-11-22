@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "buildCommand": "cd fd && npm install && npm run build",
-  "outputDirectory": "fd/dist",
-  "installCommand": "cd fd && npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
   "framework": "vite",
+  "rootDirectory": "fd",
   "rewrites": [
     {
       "source": "/(.*)",
