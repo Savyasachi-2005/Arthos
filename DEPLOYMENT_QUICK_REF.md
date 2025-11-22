@@ -9,7 +9,7 @@ database_url=postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST/YOUR_DB_NAM
 
 GEMINI_API_KEY=your_gemini_api_key_here
 
-PYTHON_VERSION=3.12.0
+PYTHON_VERSION=3.11.9
 ```
 
 ### Render Web Service Configuration:
