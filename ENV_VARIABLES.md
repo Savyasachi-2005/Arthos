@@ -8,18 +8,18 @@ Set these in **Render Dashboard** → **Your Web Service** → **Environment**:
 
 #### 1. Database URL
 ```bash
-database_url=postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a/arthos
+database_url=url
 ```
 - **Description**: PostgreSQL database connection string (INTERNAL URL)
 - **Note**: This is the internal Render database URL for better performance
 - **Alternative**: If internal URL doesn't work, use external URL:
   ```bash
-  database_url=postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a.oregon-postgres.render.com/arthos
+  database_url=url
   ```
 
 #### 2. Gemini API Key
 ```bash
-GEMINI_API_KEY=AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
+GEMINI_API_KEY=api_key
 ```
 - **Description**: Google Gemini AI API key for bank statement analysis
 - **Get your key**: https://makersuite.google.com/app/apikey
@@ -211,3 +211,4 @@ VITE_API_BASE_URL=https://YOUR-BACKEND-NAME.onrender.com/api
 ---
 
 Need help? Check `DEPLOYMENT_GUIDE.md` for detailed deployment instructions.
+
