@@ -1,5 +1,4 @@
 {
-  "buildCommand": "cd fd && npm ci && npm run build",
-  "outputDirectory": "fd/dist",
-  "installCommand": "echo 'Skipping default install'"
+  "buildCommand": "npm install --prefix fd && npm run build --prefix fd",
+  "outputDirectory": "fd/dist"
 }
