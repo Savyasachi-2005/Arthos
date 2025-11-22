@@ -1,23 +1,35 @@
 #!/bin/bash
 # Build script for Render deployment
 
-# Set environment variables for Rust toolchain
+set -e  # Exit on error
+
+echo "Starting build process..."
+
+# Set environment variables for Rust toolchain (in case needed)
 export CARGO_HOME=/opt/render/project/.cargo
 export RUSTUP_HOME=/opt/render/project/.rustup
-mkdir -p $CARGO_HOME
-mkdir -p $RUSTUP_HOME
+export CARGO_NET_GIT_FETCH_WITH_CLI=true
+mkdir -p "$CARGO_HOME"
+mkdir -p "$RUSTUP_HOME"
 
-# Upgrade pip to latest version
-CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install --upgrade pip
+echo "Python version: $(python --version)"
+echo "Pip version: $(pip --version)"
 
-# Install packages with binary wheels only (no compilation)
-CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install --only-binary :all: -r requirements.txt || {
-    echo "Failed to install with binary wheels only, trying with fallback..."
-    # Fallback: Install specific packages that have wheels first
-    CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install --only-binary :all: fastapi==0.109.2 uvicorn[standard]==0.27.1 || exit 1
-    CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install --only-binary :all: pydantic-core pydantic==2.6.4 || exit 1
-    CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install --only-binary :all: sqlmodel sqlalchemy psycopg2-binary || exit 1
-    CARGO_HOME=$CARGO_HOME RUSTUP_HOME=$RUSTUP_HOME pip install -r requirements.txt
-}
+# Upgrade pip, setuptools, and wheel
+echo "Upgrading pip, setuptools, and wheel..."
+pip install --upgrade pip setuptools wheel
 
-echo "Build completed successfully!"
+# Try to install with pre-built wheels only (faster and avoids compilation)
+echo "Attempting to install dependencies with binary wheels only..."
+if pip install --only-binary :all: -r requirements.txt 2>/dev/null; then
+    echo "✓ Successfully installed all dependencies with binary wheels"
+else
+    echo "⚠ Some packages don't have binary wheels, installing with compilation fallback..."
+    # Install packages that definitely have wheels first
+    pip install --only-binary :all: fastapi uvicorn pydantic sqlalchemy psycopg2-binary 2>/dev/null || true
+    
+    # Then install everything else (allowing source builds if needed)
+    pip install -r requirements.txt
+fi
+
+echo "✓ Build completed successfully!"
