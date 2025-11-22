@@ -1,8 +1,8 @@
 # FastAPI and web framework dependencies
 fastapi==0.109.2
 uvicorn[standard]==0.27.1
-pydantic==1.10.13
-pydantic[email]==1.10.13
+pydantic==2.6.0
+pydantic-settings==2.1.0
 
 # Authentication
 python-jose[cryptography]==3.3.0
