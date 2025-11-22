@@ -6,7 +6,7 @@ services:
     plan: free
     branch: main
     rootDir: bd
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: bash build.sh
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
