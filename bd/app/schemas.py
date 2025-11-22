@@ -49,6 +49,7 @@ class AnalyzeResponse(BaseModel):
     summary: SummaryData
     categories: Dict[str, float] = Field(..., description="Category-wise spending breakdown")
     transactions: List[TransactionOut]
+    detected_subscriptions: List[Dict] = Field(default_factory=list, description="Auto-detected subscriptions")
 
 
 class TransactionListResponse(BaseModel):

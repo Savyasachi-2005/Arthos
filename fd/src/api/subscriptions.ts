@@ -42,3 +42,10 @@ export const getSubscriptionSummary = async (): Promise<SubscriptionSummary> => 
   const response = await apiClient.get<SubscriptionSummary>('/subscriptions/summary');
   return response.data;
 };
+
+export const createSubscriptionsBatch = async (
+  subscriptions: SubscriptionPayload[]
+): Promise<Subscription[]> => {
+  const response = await apiClient.post<Subscription[]>('/subscriptions/batch', subscriptions);
+  return response.data;
+};

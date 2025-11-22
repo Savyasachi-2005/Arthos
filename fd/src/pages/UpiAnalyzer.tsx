@@ -1,22 +1,73 @@
 /**
  * UPI Analyzer Page - Main analysis interface
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { UpiInput } from '../components/upi/UpiInput';
 import { SpendSummaryCard } from '../components/upi/SpendSummaryCard';
 import { CategoryBreakdownChart } from '../components/upi/CategoryBreakdownChart';
 import { MerchantListTable } from '../components/upi/MerchantListTable';
+import { SubscriptionDetectionModal } from '../components/upi/SubscriptionDetectionModal';
 import { Button } from '../components/ui/Button';
 import { useAnalyzeUpi } from '../hooks/useAnalyzeUpi';
-import { AlertCircle, CheckCircle, Home, LayoutDashboard } from 'lucide-react';
+import { AlertCircle, Home, LayoutDashboard, Sparkles } from 'lucide-react';
 
 export const UpiAnalyzer: React.FC = () => {
   const navigate = useNavigate();
   const { mutate: analyzeUpi, data, isPending, isError, error } = useAnalyzeUpi();
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const handleAnalyze = (text: string) => {
-    analyzeUpi(text);
+    const loadingToast = toast.loading('Analyzing transactions...');
+    
+    analyzeUpi(text, {
+      onSuccess: (data) => {
+        toast.dismiss(loadingToast);
+        toast.success(
+          `Successfully analyzed ${data.transactions.length} transaction${data.transactions.length !== 1 ? 's' : ''}!`,
+          {
+            icon: '✅',
+            duration: 3000,
+          }
+        );
+        
+        // Show subscription detection modal if subscriptions found
+        if (data.detected_subscriptions && data.detected_subscriptions.length > 0) {
+          const autoAddCount = data.detected_subscriptions.filter(
+            (sub) => sub.confidence >= 0.7  // Match new threshold
+          ).length;
+          
+          setTimeout(() => {
+            setShowSubscriptionModal(true);
+            
+            if (autoAddCount > 0 && data.detected_subscriptions) {
+              toast.success(
+                `🎯 Detected ${data.detected_subscriptions.length} subscription${data.detected_subscriptions.length !== 1 ? 's' : ''}! Auto-adding ${autoAddCount}...`,
+                {
+                  duration: 6000,
+                  style: {
+                    background: '#8b5cf6',
+                    color: '#fff',
+                  },
+                }
+              );
+            } else if (data.detected_subscriptions) {
+              toast.success(
+                `🎯 Found ${data.detected_subscriptions.length} potential subscription${data.detected_subscriptions.length !== 1 ? 's' : ''}!`,
+                {
+                  duration: 5000,
+                }
+              );
+            }
+          }, 500);
+        }
+      },
+      onError: (error: any) => {
+        toast.dismiss(loadingToast);
+        toast.error(error.response?.data?.detail || 'Failed to analyze transactions');
+      },
+    });
   };
 
   return (
@@ -81,20 +132,35 @@ export const UpiAnalyzer: React.FC = () => {
           {/* Success Message with Results */}
           {data && (
             <>
-              {/* Success Banner */}
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex">
-                  <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0" />
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">
-                      Analysis Complete!
-                    </h3>
-                    <p className="mt-1 text-sm text-green-700">
-                      Successfully parsed {data.transactions.length} transaction(s) from your messages
-                    </p>
+              {/* Subscription Detection Banner */}
+              {data.detected_subscriptions && data.detected_subscriptions.length > 0 && (
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-5 shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="bg-purple-500 rounded-xl p-2">
+                        <Sparkles className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-purple-900">
+                          🎯 {data.detected_subscriptions.length} Subscription{data.detected_subscriptions.length !== 1 ? 's' : ''} Detected!
+                        </h3>
+                        <p className="mt-1 text-sm text-purple-700">
+                          {data.detected_subscriptions.filter(s => s.confidence >= 0.7).length > 0 
+                            ? `Auto-added ${data.detected_subscriptions.filter(s => s.confidence >= 0.7).length} subscription${data.detected_subscriptions.filter(s => s.confidence >= 0.7).length !== 1 ? 's' : ''} to your account! Review all detections below.`
+                            : `We found potential recurring payments. Review and add them to track your subscriptions.`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={() => setShowSubscriptionModal(true)}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-lg hover:shadow-xl"
+                    >
+                      View Subscriptions
+                    </Button>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Summary Cards */}
               <SpendSummaryCard summary={data.summary} />
@@ -157,6 +223,20 @@ export const UpiAnalyzer: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Subscription Detection Modal */}
+      {showSubscriptionModal && data?.detected_subscriptions && data.detected_subscriptions.length > 0 && (
+        <SubscriptionDetectionModal
+          detectedSubscriptions={data.detected_subscriptions}
+          onClose={() => setShowSubscriptionModal(false)}
+          onSuccess={() => {
+            toast.success('Visit the Subscriptions page to manage your subscriptions.', {
+              duration: 4000,
+            });
+          }}
+          autoAdd={true}
+        />
+      )}
     </div>
   );
 };

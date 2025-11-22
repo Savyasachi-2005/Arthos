@@ -3,6 +3,7 @@
  * Modern, user-friendly bank statement analysis with Gemini AI
  */
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Building2, Sparkles, FileText, Download, Brain, CheckCircle, ArrowRight } from 'lucide-react';
 import { StatementUpload } from '../components/bank/StatementUpload';
 import { StatementPreview } from '../components/bank/StatementPreview';
@@ -38,13 +39,38 @@ export function BankAnalyzer() {
   const handleUpload = async (fileOrText: File | string) => {
     resetAnalysis();
     setShowPreview(false);
-    await upload(fileOrText);
-    setShowPreview(true);
+    
+    const loadingToast = toast.loading('Processing statement...');
+    
+    try {
+      await upload(fileOrText);
+      toast.dismiss(loadingToast);
+      toast.success('Statement uploaded successfully!', {
+        icon: '📄',
+        duration: 3000,
+      });
+      setShowPreview(true);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error(error.message || 'Failed to upload statement');
+    }
   };
 
   const handleAnalyze = async () => {
     if (uploadData) {
-      await analyze(uploadData.raw_text);
+      const loadingToast = toast.loading('Analyzing with AI...');
+      
+      try {
+        await analyze(uploadData.raw_text);
+        toast.dismiss(loadingToast);
+        toast.success('Analysis complete!', {
+          icon: '🎉',
+          duration: 4000,
+        });
+      } catch (error: any) {
+        toast.dismiss(loadingToast);
+        toast.error(error.message || 'Analysis failed');
+      }
     }
   };
 
@@ -52,12 +78,15 @@ export function BankAnalyzer() {
     resetUpload();
     resetAnalysis();
     setShowPreview(false);
+    toast.success('Ready for new analysis');
   };
 
   const handleDownloadReport = async () => {
     if (!uploadData || !analysisData) return;
     
     setIsDownloading(true);
+    const loadingToast = toast.loading('Generating PDF report...');
+    
     try {
       const blob = await downloadReport(uploadData.raw_text, analysisData);
       
@@ -70,9 +99,16 @@ export function BankAnalyzer() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      
+      toast.dismiss(loadingToast);
+      toast.success('Report downloaded successfully!', {
+        icon: '📥',
+        duration: 3000,
+      });
     } catch (error) {
       console.error('Failed to download report:', error);
-      alert('Failed to download report. Please try again.');
+      toast.dismiss(loadingToast);
+      toast.error('Failed to download report. Please try again.');
     } finally {
       setIsDownloading(false);
     }
@@ -97,6 +133,25 @@ export function BankAnalyzer() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Upload your bank statement and get AI-powered financial insights in seconds
           </p>
+          
+          {/* Important Note */}
+          <div className="max-w-3xl mx-auto mt-4 p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl shadow-sm">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-amber-900">
+                  📄 Statement Support: Currently processing up to 3 pages (10-15 days of transactions)
+                </p>
+                <p className="text-xs text-amber-700 mt-1">
+                  We're actively working on expanding support for longer statement periods. Stay tuned for updates!
+                </p>
+              </div>
+            </div>
+          </div>
           
           {/* Feature Pills */}
           <div className="flex flex-wrap justify-center gap-3 pt-2">

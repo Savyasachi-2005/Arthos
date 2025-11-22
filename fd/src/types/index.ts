@@ -34,6 +34,17 @@ export interface AnalyzeResponse {
   summary: Summary;
   categories: Categories;
   transactions: Transaction[];
+  detected_subscriptions?: DetectedSubscription[];
+}
+
+export interface DetectedSubscription {
+  name: string;
+  amount: number;
+  billing_cycle: BillingCycle;
+  category: string;
+  confidence: number;
+  transaction_id: string;
+  renewal_date: string;
 }
 
 export interface TransactionListResponse {
@@ -112,7 +123,7 @@ export const CATEGORIES: Record<string, CategoryConfig> = {
 
 export type CategoryName = keyof typeof CATEGORIES;
 
-export type BillingCycle = 'monthly' | 'yearly';
+export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
 
 export interface SubscriptionPayload {
   name: string;

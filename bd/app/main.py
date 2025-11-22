@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db
-from app.routers import upi, subscriptions, bank
+from app.routers import upi, subscriptions, bank, auth
 from app.schemas import HealthResponse
 
 # Configure logging
@@ -54,6 +54,7 @@ app.add_middleware(
 )
 
 # Include routers with /api prefix
+app.include_router(auth.router, prefix="/api")
 app.include_router(upi.router, prefix="/api")
 app.include_router(subscriptions.router, prefix="/api")
 app.include_router(bank.router, prefix="/api")

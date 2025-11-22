@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import List, Optional
+from uuid import UUID
 
 from fastapi import HTTPException, status
 from sqlalchemy import func
@@ -31,9 +32,9 @@ class SubscriptionFilters:
     billing_cycle: Optional[BillingCycle] = None
 
 
-def create_subscription(payload: SubscriptionCreate, session: Session) -> SubscriptionResponse:
+def create_subscription(payload: SubscriptionCreate, session: Session, user_id: UUID) -> SubscriptionResponse:
     """Persist a new subscription and return the response model."""
-    subscription = Subscription(**payload.model_dump())
+    subscription = Subscription(**payload.model_dump(), user_id=user_id)
     session.add(subscription)
     session.commit()
     session.refresh(subscription)
@@ -45,13 +46,17 @@ def list_subscriptions(
     filters: SubscriptionFilters,
     limit: int,
     offset: int,
+    user_id: UUID
 ) -> SubscriptionListResponse:
-    """Return paginated subscriptions with applied filters."""
-    query = _apply_filters(select(Subscription), filters)
+    """Return paginated subscriptions with applied filters for a specific user."""
+    query = _apply_filters(select(Subscription).where(Subscription.user_id == user_id), filters)
     query = query.order_by(Subscription.created_at.desc()).offset(offset).limit(limit)
     items = session.exec(query).all()
 
-    count_query = _apply_filters(select(func.count()).select_from(Subscription), filters)
+    count_query = _apply_filters(
+        select(func.count()).select_from(Subscription).where(Subscription.user_id == user_id), 
+        filters
+    )
     total = session.exec(count_query).one()
 
     responses = [_to_response(item) for item in items]
@@ -62,9 +67,10 @@ def update_subscription(
     subscription_id: int,
     payload: SubscriptionUpdate,
     session: Session,
+    user_id: UUID
 ) -> SubscriptionResponse:
     """Update an existing subscription."""
-    subscription = _get_subscription_or_404(subscription_id, session)
+    subscription = _get_subscription_or_404(subscription_id, session, user_id)
     update_data = payload.model_dump(exclude_unset=True)
 
     for key, value in update_data.items():
@@ -76,16 +82,18 @@ def update_subscription(
     return _to_response(subscription)
 
 
-def delete_subscription(subscription_id: int, session: Session) -> None:
+def delete_subscription(subscription_id: int, session: Session, user_id: UUID) -> None:
     """Delete a subscription and handle missing records."""
-    subscription = _get_subscription_or_404(subscription_id, session)
+    subscription = _get_subscription_or_404(subscription_id, session, user_id)
     session.delete(subscription)
     session.commit()
 
 
-def get_summary(session: Session) -> SubscriptionSummaryResponse:
-    """Compute monthly/yearly burn and upcoming renewals."""
-    subscriptions = session.exec(select(Subscription)).all()
+def get_summary(session: Session, user_id: UUID) -> SubscriptionSummaryResponse:
+    """Compute monthly/yearly burn and upcoming renewals for a specific user."""
+    subscriptions = session.exec(
+        select(Subscription).where(Subscription.user_id == user_id)
+    ).all()
 
     monthly_burn = sum(_calculate_monthly_equivalent(sub) for sub in subscriptions)
     yearly_burn = monthly_burn * 12
@@ -128,9 +136,9 @@ def _to_response(subscription: Subscription) -> SubscriptionResponse:
     return response.model_copy(update={"monthly_equivalent": round(monthly_equivalent, 2)})
 
 
-def _get_subscription_or_404(subscription_id: int, session: Session) -> Subscription:
+def _get_subscription_or_404(subscription_id: int, session: Session, user_id: UUID) -> Subscription:
     subscription = session.get(Subscription, subscription_id)
-    if not subscription:
+    if not subscription or subscription.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Subscription with id {subscription_id} not found",

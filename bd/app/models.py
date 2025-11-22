@@ -7,12 +7,27 @@ from enum import Enum
 from typing import Optional
 from uuid import UUID, uuid4
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, SQLModel, Relationship
+
+
+class User(SQLModel, table=True):
+    """User authentication and profile model."""
+    __tablename__ = "users"
+    
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    email: str = Field(unique=True, index=True, max_length=255)
+    username: str = Field(unique=True, index=True, min_length=3, max_length=50)
+    hashed_password: str = Field(max_length=255)
+    full_name: Optional[str] = Field(default=None, max_length=100)
+    is_active: bool = Field(default=True)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class BillingCycle(str, Enum):
     """Billing cycle enum for subscriptions."""
     monthly = "monthly"
+    quarterly = "quarterly"
     yearly = "yearly"
 
 
@@ -22,6 +37,7 @@ class Transaction(SQLModel, table=True):
     
     Attributes:
         id: Unique identifier (UUID)
+        user_id: Foreign key to User
         raw_text: Original SMS/message text
         merchant: Extracted merchant name (if available)
         amount: Transaction amount in INR
@@ -32,6 +48,7 @@ class Transaction(SQLModel, table=True):
     __tablename__ = "transactions"
     
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
     raw_text: str = Field(index=True)
     merchant: Optional[str] = Field(default=None, index=True)
     amount: float = Field(gt=0)  # Must be positive
@@ -45,6 +62,7 @@ class Subscription(SQLModel, table=True):
     __tablename__ = "subscriptions"
 
     id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
     name: str = Field(index=True, min_length=1, max_length=120)
     amount: float = Field(gt=0)
     billing_cycle: BillingCycle = Field(default=BillingCycle.monthly)
@@ -59,6 +77,7 @@ class BankAnalysis(SQLModel, table=True):
     
     Attributes:
         id: Unique identifier (UUID)
+        user_id: Foreign key to User
         raw_text: Original bank statement text
         total_spend: Total debit amount
         total_income: Total credit amount
@@ -71,6 +90,7 @@ class BankAnalysis(SQLModel, table=True):
     __tablename__ = "bank_analyses"
     
     id: UUID = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="users.id", index=True)
     raw_text: str = Field(index=False)  # Full statement text
     total_spend: float = Field(default=0.0)
     total_income: float = Field(default=0.0)

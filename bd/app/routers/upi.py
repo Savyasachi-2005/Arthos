@@ -3,13 +3,13 @@ UPI transaction analysis router.
 Provides endpoints for parsing and analyzing UPI/SMS messages.
 """
 import logging
-from typing import List, Optional
+from typing import List, Optional, Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from app.database import get_session
-from app.models import Transaction
+from app.models import Transaction, User
 from app.schemas import (
     AnalyzeResponse,
     SummaryData,
@@ -24,6 +24,8 @@ from app.services.summary_builder import (
     build_category_breakdown
 )
 from app.services.upi_parser import parse_messages
+from app.services.subscription_detector import detect_subscriptions_from_transactions
+from app.routers.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +35,8 @@ router = APIRouter(prefix="/upi", tags=["UPI Analysis"])
 @router.post("/analyze", response_model=AnalyzeResponse)
 async def analyze_upi_messages(
     request: UPIAnalyzeRequest,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ) -> AnalyzeResponse:
     """
     Parse and analyze UPI/SMS messages, extract transactions, and persist to database.
@@ -72,6 +75,7 @@ async def analyze_upi_messages(
             
             # Create model instance
             transaction = Transaction(
+                user_id=current_user.id,
                 raw_text=parsed.raw_text,
                 merchant=parsed.merchant,
                 amount=parsed.amount,
@@ -92,6 +96,14 @@ async def analyze_upi_messages(
         
         logger.info(f"Persisted {len(db_transactions)} transactions to database")
         
+        # Detect potential subscriptions from transactions
+        detected_subscriptions = detect_subscriptions_from_transactions(
+            db_transactions,
+            min_confidence=0.5  # Lower threshold to catch all subscription platforms
+        )
+        
+        logger.info(f"Detected {len(detected_subscriptions)} potential subscriptions")
+        
         # Build summary
         summary_data = build_summary(db_transactions)
         
@@ -110,7 +122,8 @@ async def analyze_upi_messages(
                 top_merchants=top_merchants_list
             ),
             categories=summary_data["categories"],
-            transactions=transaction_outs
+            transactions=transaction_outs,
+            detected_subscriptions=[sub.to_dict() for sub in detected_subscriptions]
         )
         
     except Exception as e:
@@ -127,7 +140,8 @@ async def get_transactions(
     limit: int = Query(default=50, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
     category: Optional[str] = Query(default=None),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ) -> TransactionListResponse:
     """
     Get list of transactions with pagination and optional category filter.
@@ -142,8 +156,8 @@ async def get_transactions(
         TransactionListResponse with transactions and pagination info
     """
     try:
-        # Build query
-        statement = select(Transaction)
+        # Build query - filter by user_id
+        statement = select(Transaction).where(Transaction.user_id == current_user.id)
         
         # Apply category filter if provided
         if category:
@@ -153,7 +167,7 @@ async def get_transactions(
         statement = statement.order_by(Transaction.created_at.desc())
         
         # Get total count
-        count_statement = select(Transaction)
+        count_statement = select(Transaction).where(Transaction.user_id == current_user.id)
         if category:
             count_statement = count_statement.where(Transaction.category == category)
         total = len(session.exec(count_statement).all())

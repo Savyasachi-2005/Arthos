@@ -11,7 +11,7 @@ from fastapi.responses import Response
 from sqlmodel import Session, select
 
 from app.database import get_session
-from app.models import BankAnalysis
+from app.models import BankAnalysis, User
 from app.schemas.bank import (
     AnalyzeStatementRequest,
     AnalyzeStatementResponse,
@@ -24,6 +24,7 @@ from app.services.gemini_service import get_gemini_service
 from app.services.ocr_service import ocr_service
 from app.services.statement_cleaner import statement_cleaner
 from app.services.report_generator import report_generator
+from app.routers.auth import get_current_user
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,7 @@ router = APIRouter(prefix="/bank", tags=["bank"])
 async def upload_statement(
     file: UploadFile = File(None),
     raw_text: str = None,
+    current_user: User = Depends(get_current_user)
 ) -> StatementUploadResponse:
     """
     Upload bank statement for text extraction.
@@ -125,6 +127,7 @@ async def upload_statement(
 async def analyze_statement(
     request: AnalyzeStatementRequest,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ) -> AnalyzeStatementResponse:
     """
     Analyze bank statement using Gemini AI.
@@ -164,6 +167,7 @@ async def analyze_statement(
         # Save to database
         try:
             bank_analysis = BankAnalysis(
+                user_id=current_user.id,
                 raw_text=request.raw_text,
                 total_spend=analysis_result.summary.total_spend,
                 total_income=analysis_result.summary.total_income,
@@ -201,6 +205,7 @@ async def get_analysis_history(
     limit: int = 10,
     offset: int = 0,
     session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
 ) -> BankAnalysisHistoryResponse:
     """
     Get previously analyzed bank statements.
@@ -216,9 +221,10 @@ async def get_analysis_history(
     logger.info(f"History request: limit={limit}, offset={offset}")
     
     try:
-        # Query analyses ordered by most recent
+        # Query analyses ordered by most recent, filtered by user
         statement = (
             select(BankAnalysis)
+            .where(BankAnalysis.user_id == current_user.id)
             .order_by(BankAnalysis.created_at.desc())
             .offset(offset)
             .limit(limit)
@@ -226,8 +232,8 @@ async def get_analysis_history(
         
         analyses = session.exec(statement).all()
         
-        # Count total
-        count_statement = select(BankAnalysis)
+        # Count total for user
+        count_statement = select(BankAnalysis).where(BankAnalysis.user_id == current_user.id)
         total = len(session.exec(count_statement).all())
         
         # Convert to response items
@@ -264,6 +270,7 @@ async def get_analysis_history(
 @router.post("/download-report")
 async def download_report(
     request: DownloadReportRequest,
+    current_user: User = Depends(get_current_user)
 ) -> Response:
     """
     Generate and download a professional PDF report of the analysis.

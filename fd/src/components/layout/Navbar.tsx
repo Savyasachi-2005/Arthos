@@ -2,7 +2,7 @@
  * Navbar Component
  * Modern navigation bar with gradient and animations
  */
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { 
   Home, 
@@ -12,11 +12,17 @@ import {
   Bell, 
   Menu, 
   X,
-  Sparkles
+  Sparkles,
+  LogOut,
+  User
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
+import toast from 'react-hot-toast';
 
 export function Navbar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, user, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
@@ -30,6 +36,16 @@ export function Navbar() {
     { path: '/bank-analyzer', label: 'Bank Analyzer', icon: Building2 },
     { path: '/subscriptions', label: 'Subscriptions', icon: Bell },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (error) {
+      toast.error('Logout failed');
+    }
+  };
 
   return (
     <nav className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 shadow-lg sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
@@ -89,11 +105,36 @@ export function Navbar() {
               );
             })}
             
-            {/* CTA Button */}
-            <button className="ml-4 px-5 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
-              <Sparkles className="w-4 h-4" />
-              <span>Get Started</span>
-            </button>
+            {/* Auth Buttons */}
+            {isAuthenticated ? (
+              <div className="ml-4 flex items-center space-x-3">
+                <div className="flex items-center space-x-2 px-3 py-2 bg-white/10 rounded-lg">
+                  <User className="w-4 h-4 text-white" />
+                  <span className="text-sm text-white font-medium">{user?.username}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium shadow-md hover:shadow-lg transition-all duration-300 flex items-center space-x-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="ml-4 flex items-center space-x-2">
+                <Link to="/login">
+                  <button className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-all duration-300">
+                    Login
+                  </button>
+                </Link>
+                <Link to="/signup">
+                  <button className="px-5 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center space-x-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Sign Up</span>
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -141,10 +182,36 @@ export function Navbar() {
               );
             })}
             
-            <button className="mt-2 px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg font-semibold shadow-md flex items-center justify-center space-x-2">
-              <Sparkles className="w-5 h-5" />
-              <span>Get Started</span>
-            </button>
+            {/* Mobile Auth Buttons */}
+            {isAuthenticated ? (
+              <>
+                <div className="flex items-center space-x-2 px-4 py-3 bg-white/10 rounded-lg">
+                  <User className="w-5 h-5 text-white" />
+                  <span className="text-sm text-white font-medium">{user?.username}</span>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="mt-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium flex items-center justify-center space-x-2"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="w-full mt-2 px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium">
+                    Login
+                  </button>
+                </Link>
+                <Link to="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="px-4 py-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg font-semibold shadow-md flex items-center justify-center space-x-2">
+                    <Sparkles className="w-5 h-5" />
+                    <span>Sign Up</span>
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

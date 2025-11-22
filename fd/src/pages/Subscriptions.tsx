@@ -2,6 +2,7 @@
  * Subscription management and burn tracker page
  */
 import React, { useMemo, useState } from 'react';
+import toast from 'react-hot-toast';
 import { Plus, Flame, CalendarClock, Search, Filter, X, TrendingUp } from 'lucide-react';
 import { Subscription, SubscriptionPayload, SubscriptionQueryParams } from '../types';
 import { Button } from '../components/ui/Button';
@@ -62,12 +63,37 @@ export const Subscriptions: React.FC = () => {
 
   const handleSubmit = (values: SubscriptionPayload) => {
     if (editingSubscription) {
+      const loadingToast = toast.loading('Updating subscription...');
       updateMutation.mutate(
         { id: editingSubscription.id, data: values },
-        { onSuccess: handleCloseModal }
+        {
+          onSuccess: () => {
+            toast.dismiss(loadingToast);
+            toast.success(`${values.name} updated successfully!`);
+            handleCloseModal();
+          },
+          onError: (error: any) => {
+            toast.dismiss(loadingToast);
+            toast.error(error.response?.data?.detail || 'Failed to update subscription');
+          },
+        }
       );
     } else {
-      createMutation.mutate(values, { onSuccess: handleCloseModal });
+      const loadingToast = toast.loading('Adding subscription...');
+      createMutation.mutate(values, {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          toast.success(`${values.name} added successfully!`, {
+            icon: '✅',
+            duration: 3000,
+          });
+          handleCloseModal();
+        },
+        onError: (error: any) => {
+          toast.dismiss(loadingToast);
+          toast.error(error.response?.data?.detail || 'Failed to add subscription');
+        },
+      });
     }
   };
 
@@ -76,7 +102,17 @@ export const Subscriptions: React.FC = () => {
       `Delete ${subscription.name}? This cannot be undone.`
     );
     if (confirmed) {
-      deleteMutation.mutate(subscription.id);
+      const loadingToast = toast.loading('Deleting subscription...');
+      deleteMutation.mutate(subscription.id, {
+        onSuccess: () => {
+          toast.dismiss(loadingToast);
+          toast.success(`${subscription.name} deleted successfully`);
+        },
+        onError: (error: any) => {
+          toast.dismiss(loadingToast);
+          toast.error(error.response?.data?.detail || 'Failed to delete subscription');
+        },
+      });
     }
   };
 
