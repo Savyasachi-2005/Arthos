@@ -1,4 +1,21 @@
 {
-  "buildCommand": "npm install --prefix fd && npm run build --prefix fd",
-  "outputDirectory": "fd/dist"
+  "version": 2,
+  "builds": [
+    {
+      "src": "fd/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/fd/dist/index.html"
+    }
+  ]
 }
