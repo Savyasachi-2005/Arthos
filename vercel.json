@@ -1,14 +1,6 @@
 {
-  "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "framework": "vite",
-  "rootDirectory": "fd",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "buildCommand": "cd fd && npm run build",
+  "outputDirectory": "fd/dist",
+  "installCommand": "cd fd && npm install",
+  "devCommand": "cd fd && npm run dev"
 }
