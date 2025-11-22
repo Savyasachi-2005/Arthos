@@ -1,6 +1,5 @@
 {
   "buildCommand": "cd fd && npm ci && npm run build",
   "outputDirectory": "fd/dist",
-  "installCommand": "echo 'Skipping default install'",
-  "ignoreCommand": "exit 0"
+  "installCommand": "echo 'Skipping default install'"
 }
