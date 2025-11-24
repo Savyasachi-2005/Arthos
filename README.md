@@ -244,36 +244,5 @@ npm run preview
 4. Run tests
 5. Submit a pull request
 
-## 📝 License
-
-This project is created for hackathon purposes.
-
-## 🐛 Troubleshooting
-
-### Backend Issues
-- **Port 8000 already in use**: Change port with `--port 8001`
-- **Module not found**: Ensure virtual environment is activated
-- **Database errors**: Delete `arthos.db` and restart
-
-### Frontend Issues
-- **Port 5173 already in use**: Vite will auto-increment to 5174
-- **API connection errors**: Verify backend is running on port 8000
-- **Build errors**: Delete `node_modules` and run `npm install`
-
-## 📞 Support
-
-For issues or questions:
-1. Check the troubleshooting section
-2. Review API documentation at `http://localhost:8000/docs`
-3. Check console logs for detailed error messages
-
-## 🎉 Acknowledgments
-
-Built with:
-- FastAPI, SQLModel, Pydantic
-- React, TypeScript, TailwindCSS
-- Recharts, React Query, Axios
-- Lucide React (icons)
 
 
-Hy Guys
