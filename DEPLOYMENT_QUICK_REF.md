@@ -5,9 +5,15 @@
 Add these in Render Dashboard → Your Web Service → Environment:
 
 ```bash
+<<<<<<< HEAD
 database_url=url
 
 GEMINI_API_KEY=api
+=======
+database_url=postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST/YOUR_DB_NAME
+
+GEMINI_API_KEY=your_gemini_api_key_here
+>>>>>>> 1775e5720344f15334638226771da21c71ba4ffc
 
 PYTHON_VERSION=3.12.0
 ```

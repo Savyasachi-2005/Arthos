@@ -8,6 +8,7 @@ Set these in **Render Dashboard** → **Your Web Service** → **Environment**:
 
 #### 1. Database URL
 ```bash
+<<<<<<< HEAD
 database_url=url
 ```
 - **Description**: PostgreSQL database connection string (INTERNAL URL)
@@ -20,6 +21,18 @@ database_url=url
 #### 2. Gemini API Key
 ```bash
 GEMINI_API_KEY=api_key
+=======
+database_url=postgresql://YOUR_DB_USER:YOUR_DB_PASSWORD@YOUR_DB_HOST/YOUR_DB_NAME
+```
+- **Description**: PostgreSQL database connection string (INTERNAL URL)
+- **Note**: Use your Render database internal URL for better performance
+- **Get it from**: Render Dashboard → Your Database → Internal Database URL
+- **Alternative**: If internal URL doesn't work, use external URL from Render dashboard
+
+#### 2. Gemini API Key
+```bash
+GEMINI_API_KEY=your_gemini_api_key_here
+>>>>>>> 1775e5720344f15334638226771da21c71ba4ffc
 ```
 - **Description**: Google Gemini AI API key for bank statement analysis
 - **Get your key**: https://makersuite.google.com/app/apikey
@@ -169,15 +182,14 @@ VITE_API_BASE_URL=https://arthos-api.onrender.com/api
 ## 📞 Getting Environment Variable Values
 
 ### Your Render Database URL:
-```
-Internal: postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a/arthos
-External: postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a.oregon-postgres.render.com/arthos
-```
+- Go to Render Dashboard → Your Database
+- Copy the "Internal Database URL" (recommended for better performance)
+- Or use "External Database URL" if internal doesn't work
 
 ### Your Gemini API Key:
-```
-AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
-```
+- Get it from: https://makersuite.google.com/app/apikey
+- Sign in with your Google account
+- Create a new API key or use existing one
 
 ### To Get Your Backend URL:
 1. Deploy backend to Render
@@ -196,8 +208,8 @@ AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
 
 ### For Render (Backend):
 ```bash
-database_url=postgresql://arthos_user:4T3q0o6rvyQEr7usmc8JgePEgiFh5MrM@dpg-d4gl2aqli9vc73dmcngg-a/arthos
-GEMINI_API_KEY=AIzaSyC7UAP5ipL9GpUK6BHjEd9KAgir2G_-grQ
+database_url=YOUR_RENDER_DATABASE_URL_HERE
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
 PYTHON_VERSION=3.12.0
 ```
 
