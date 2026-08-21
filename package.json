@@ -1,0 +1,10 @@
+{
+  "name": "arthos-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:fd": "cd fd && npm install",
+    "build": "cd fd && npm run build",
+    "vercel-build": "npm run install:fd && npm run build"
+  }
+}

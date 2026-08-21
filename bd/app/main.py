@@ -79,6 +79,7 @@ app.include_router(bank.router, prefix="/api")
 
 
 @app.get("/", tags=["Root"])
+@app.head("/", tags=["Root"])
 async def root():
     """Root endpoint with API information."""
     return {
@@ -90,6 +91,7 @@ async def root():
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.head("/health", response_model=HealthResponse, tags=["Health"])
 async def health_check():
     """Health check endpoint."""
     return HealthResponse(status="ok")

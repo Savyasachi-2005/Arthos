@@ -1,13 +1,5 @@
 {
-  "version": 2,
-  "buildCommand": "cd fd && npm install && npm run build",
-  "outputDirectory": "fd/dist",
-  "installCommand": "cd fd && npm install",
-  "framework": "vite",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "installCommand": "if [ -d fd ]; then (cd fd && npm install); else npm install; fi",
+  "buildCommand": "if [ -d fd ]; then (cd fd && npm run build && rm -rf ../dist && cp -r dist ../dist); else npm run build; fi",
+  "outputDirectory": "dist"
 }
